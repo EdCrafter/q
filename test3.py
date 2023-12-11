@@ -72,6 +72,21 @@ class RegistrationWindow(Window):
         self.input_text = ""
         self.input_rect = pygame.Rect(self.width / 2 - 100, self.height / 2, 200, 30)
         self.active = False
+        
+    def run(self):
+        running = True
+        while running:
+            for event in pygame.event.get():
+                if event.type == pygame.QUIT:
+                    running = False
+                elif event.type == pygame.KEYDOWN or event.type == pygame.KEYUP:
+                    self.handle_event(event)
+
+            self.update()
+            pygame.display.flip()
+            self.clock.tick(60)
+        pygame.quit()
+        sys.exit()
 
     def handle_event(self, event):
         if event.type == pygame.KEYDOWN:
@@ -83,13 +98,27 @@ class RegistrationWindow(Window):
                 self.input_text += event.unicode
 
     def update(self):
-        if self.active:
-            self.screen.fill(CYAN)
-            pygame.draw.rect(self.screen, (255, 255, 255), self.input_rect, 2)
-            font = pygame.font.Font(None, 36)
-            text_surface = font.render(self.input_text, True, (255, 255, 255))
+        font = pygame.font.Font(None, 36)
+        while self.active:
+            for event in pygame.event.get():
+                if event.type == pygame.QUIT:
+                    pygame.quit()
+                    sys.exit()
+                if event.type == pygame.KEYDOWN:
+                    if event.key == pygame.K_RETURN:
+                        self.active = False
+                    elif event.key == pygame.K_BACKSPACE:
+                        self.input_text = self.input_text[:-1]
+                    else:
+                        self.input_text += event.unicode
+
+            self.screen.fill(BLACK)
+            pygame.draw.rect(self.screen, WHITE, self.input_rect, 2)
+            text_surface = font.render(self.input_text, True, WHITE)
             text_rect = text_surface.get_rect(center=self.input_rect.center)
             self.screen.blit(text_surface, text_rect)
+            pygame.display.flip()
+
 
     def switch_to_parent(self):
         self.active = False
