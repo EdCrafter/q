@@ -1,0 +1,6 @@
+Name: ed
+Score: 0
+Name: anna
+Score: 12
+Name: mmm
+Score: 1000000
