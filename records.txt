@@ -8,3 +8,5 @@ Name: d
 Score: 0
 Name: ув
 Score: 0
+Name: едуард
+Score: 0
