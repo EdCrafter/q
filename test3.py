@@ -1,6 +1,8 @@
 import pygame
 import sys
 import re
+import math
+import random
 
 WHITE = (255, 255, 255)
 BLACK = (0, 0, 0)
@@ -80,7 +82,10 @@ class CustomerWindow(Window):
         self.scoreText = ""
         self.customer_score=0
         self.customer_name=name
-        
+        self.play_window = PlayWindow(self)
+        #self.settings_window = CustomerWindow(self,self.input_text)
+        #self.info_window = CustomerWindow(self,self.input_text)
+
     def run(self):
         running = True
         while running:
@@ -94,8 +99,7 @@ class CustomerWindow(Window):
         sys.exit()
 
     def update(self):
-        
-        exit_button = Button(self.width / 2 - 150, self.height / 2 + 200, 300, 50,LIME, "Повернутися в меню")
+        exit_button = Button(self.width / 2 - 150, self.height / 2 + 200, 300, 50,LIME, "Вихід")
         play_button = Button(self.width / 2 - 150, self.height / 2 -40, 300, 50,GREEN, "Грати")
         info_button = Button(self.width / 2 - 150, self.height / 2 +120, 300, 50,LIME, "Інформація")
         setting_button = Button(self.width / 2 - 150, self.height / 2 +40, 300, 50,LIME, "Налаштування")
@@ -106,24 +110,23 @@ class CustomerWindow(Window):
                 if event.type == pygame.QUIT:
                     pygame.quit()
                     sys.exit()
-            if exit_button.is_clicked():
-                self.running = False
-                self.active = False
+            if play_button.is_clicked():
+                self.play_window.active = True
+                self.play_window.update()
                 break
+            # if exit_button.is_clicked():
+            #     self.running = False
+            #     self.active = False
+            #     break
             if exit_button.is_clicked():
                 self.running = False
                 self.active = False
-                break
-            if exit_button.is_clicked():
-                self.running = False
-                self.active = False
+                self.parent.running = False
+                self.parent.active = False
                 break
             self.screen.fill(BLUE)
             self.drawLines()
-            font = pygame.font.Font(None, 80)
-            prompt_text = font.render("Вікторина", True, MAGENTA)
-            prompt_rect = prompt_text.get_rect(center=(self.width / 2, self.height / 2 - 200))
-            self.screen.blit(prompt_text, prompt_rect)
+            self.drawTitle()
             font = pygame.font.Font(None, 36)
             prompt_text = font.render(f"Вітаю {self.customer_name} !!!", True, YELLOW)
             prompt_rect = prompt_text.get_rect(center=(self.width / 2, self.height / 2 - 120))
@@ -151,6 +154,23 @@ class CustomerWindow(Window):
                 if line.startswith("Score:") and nameFind:
                     self.customer_score = line.replace("Score:", "").strip().lower()
                     break
+    def drawTitle(self):
+        x = 525
+        y=180
+        pygame.draw.lines(self.screen, MAGENTA, False, [(x, y), (x, y-70)], 5)
+        pygame.draw.lines(self.screen, MAGENTA, False, [(x,y-35), (x+30,y-70)], 6)
+        pygame.draw.lines(self.screen, MAGENTA, False, [(x,y-35), (x+30,y)], 6)
+        x+=50
+        pygame.draw.lines(self.screen,YELLOW, False, [(x, y), (x, y-50)], 5)
+        pygame.draw.arc(self.screen, YELLOW, (x-17,y-30,40,30),math.pi/2*3,math.pi/2, 5)  # Верхняя полукруглая часть
+        pygame.draw.arc(self.screen, YELLOW, (x-12,y-50, 30, 20), math.pi/2*3,math.pi/2, 5)  # Нижняя полукруглая часть
+        x+=50
+        pygame.draw.lines(self.screen,  CYAN, False, [(x, y), (x, y-65)], 5)
+        pygame.draw.circle(self.screen, CYAN, (x, y-80), 5)  
+        x+=30
+        pygame.draw.arc(self.screen, RED, (x-17,y-30,40,30),math.pi/2*3-0.3,math.pi/2, 5)  # Верхняя полукруглая часть
+        pygame.draw.arc(self.screen, RED, (x-12,y-50, 30, 20), math.pi/2*3,math.pi/2, 5) 
+       
 
 class InfoWindow(Window):
     def __init__(self, parent,name=""):
@@ -315,72 +335,96 @@ class SettingWindow(Window):
                     break
 
 class PlayWindow(Window):
-    def __init__(self, parent,name=""):
+    def __init__(self,parent,language="ukrainian"):
         super().__init__(parent.width, parent.height, "Гра")
         self.parent = parent
         self.active = False
         self.current_encoding = 'utf-8'
         self.scoreText = ""
         self.customer_score=0
-        self.customer_name=name
+        self.language=language
+        self.num_q=0
+        self.last_click_time =0
+        self.background_image = pygame.image.load("bg1.jpg").convert()
         
-    def run(self):
-        running = True
-        while running:
-            for event in pygame.event.get():
-                if event.type == pygame.QUIT:
-                    running = False
-            self.update()
-            pygame.display.flip()
-            self.clock.tick(60)
-        pygame.quit()
-        sys.exit()
-
     def update(self):
-        
-        exit_button = Button(self.width / 2 - 150, self.height / 2 + 200, 300, 50,LIME, "Повернутися в меню")
-        play_button = Button(self.width / 2 - 150, self.height / 2 -40, 300, 50,GREEN, "Грати")
-        info_button = Button(self.width / 2 - 150, self.height / 2 +120, 300, 50,LIME, "Інформація")
-        setting_button = Button(self.width / 2 - 150, self.height / 2 +40, 300, 50,LIME, "Налаштування")
-        font = pygame.font.Font(None, 52)
-        self.find_record()
+        pygame.time.delay(1000)
+        easy_file = "questionsBasa/Ukrainian/easy_questions.txt"
+        medium_file = "questionsBasa/Ukrainian/medium_questions.txt"
+        hard_file = "questionsBasa/Ukrainian/hard_questions.txt"
+
+        easy_questions = self.read_questions_from_file(easy_file)
+        medium_questions = self.read_questions_from_file(medium_file)
+        hard_questions = self.read_questions_from_file(hard_file)
+
+        selected_questions = random.sample(easy_questions,5) + random.sample(medium_questions, 5) + random.sample(hard_questions, 5)
+        score = self.ask_questions(selected_questions,self.language)
         while self.active:
+            a_button = Button(self.width / 2 - 450, self.height / 2 -80, 400, 50,CYAN, self.a_text)
+            b_button = Button(self.width / 2 - 450, self.height / 2, 400, 50,CYAN, self.b_text)
+            c_button = Button(self.width / 2+50 , self.height / 2 -80, 400, 50,CYAN, self.c_text)
+            d_button = Button(self.width / 2+50 , self.height / 2 , 400, 50,CYAN, self.d_text)
             for event in pygame.event.get():
                 if event.type == pygame.QUIT:
                     pygame.quit()
                     sys.exit()
-            if exit_button.is_clicked():
-                self.running = False
-                self.active = False
-                break
-            if exit_button.is_clicked():
-                self.running = False
-                self.active = False
-                break
-            if exit_button.is_clicked():
-                self.running = False
-                self.active = False
-                break
-            self.screen.fill(BLUE)
+
+            # Проверка нажатия кнопок
+            if pygame.time.get_ticks() - self.last_click_time > 1000: 
+                if a_button.is_clicked():
+                    self.user_answer = "a"
+                    self.check_ans()
+                    self.num_q += 1
+                    self.ask_questions(selected_questions,self.language)
+                    self.last_click_time = pygame.time.get_ticks()
+                elif b_button.is_clicked():
+                    self.user_answer = "b"
+                    self.check_ans()
+                    self.num_q += 1
+                    self.ask_questions(selected_questions,self.language)
+                    self.last_click_time = pygame.time.get_ticks()
+                elif c_button.is_clicked():
+                    self.user_answer = "c"
+                    self.check_ans()
+                    self.num_q += 1
+                    self.ask_questions(selected_questions,self.language)
+                    self.last_click_time = pygame.time.get_ticks()
+                elif d_button.is_clicked():
+                    self.user_answer = "d"
+                    self.check_ans()
+                    self.num_q += 1
+                    self.ask_questions(selected_questions,self.language)
+                    self.last_click_time = pygame.time.get_ticks()
+
+            self.screen.blit(self.background_image, (0, 0))
             self.drawLines()
-            font = pygame.font.Font(None, 80)
-            prompt_text = font.render("Вікторина", True, MAGENTA)
+            font = pygame.font.Font(None, 40)
+            prompt_text = font.render(self.q_text, True, BLACK)
             prompt_rect = prompt_text.get_rect(center=(self.width / 2, self.height / 2 - 200))
             self.screen.blit(prompt_text, prompt_rect)
-            font = pygame.font.Font(None, 36)
-            prompt_text = font.render(f"Вітаю {self.customer_name} !!!", True, YELLOW)
-            prompt_rect = prompt_text.get_rect(center=(self.width / 2, self.height / 2 - 120))
-            self.screen.blit(prompt_text, prompt_rect)
-            prompt_text = font.render(f"Ваш виграш : {self.customer_score} coins", True, YELLOW)
-            prompt_rect = prompt_text.get_rect(center=(self.width / 2, self.height / 2 - 80))
-            self.screen.blit(prompt_text, prompt_rect)
-        
-            exit_button.draw(self.screen)
-            play_button.draw(self.screen)
-            setting_button.draw(self.screen)
-            info_button.draw(self.screen)
+            
+            text = "500"
+            prompt_text = font.render(text, True, (255, 255, 255))
+            prompt_rect = prompt_text.get_rect(center=(self.width / 2, self.height / 2 - 200))
+
+            # Поворот текста на 90 градусов
+            rotated_text = pygame.transform.rotate(prompt_text, 90)
+            rotated_rect = rotated_text.get_rect(center=prompt_rect.center)
+            self.screen.blit(rotated_text, rotated_rect)
+            a_button.draw(self.screen)
+            b_button.draw(self.screen)
+            c_button.draw(self.screen)
+            d_button.draw(self.screen)
             pygame.display.flip()
 
+
+    def check_ans(self):
+        print(self.user_answer,self.correct_answer)
+        if self.user_answer == self.correct_answer:
+            print("Правильно!\n")
+        else:
+            print(f"Помилка. Правильна відповідь: \n")
+        
     def find_record(self):
         nameFind = False
         with open("records.txt", "r", encoding=self.current_encoding) as file:
@@ -394,6 +438,65 @@ class PlayWindow(Window):
                 if line.startswith("Score:") and nameFind:
                     self.customer_score = line.replace("Score:", "").strip().lower()
                     break
+    def read_questions_from_file(self,file_name):
+        current_encoding = 'utf-8'
+        with open(file_name, 'r', encoding=current_encoding) as file:
+            lines = file.readlines()
+        questions = []
+        current_question = None
+        current_options = []
+        for line in lines:
+            line = line.strip()
+            if line:
+                if current_question is None:
+                    current_question = line
+                elif line.startswith("A.") or line.startswith("B.") or line.startswith("C.") or line.startswith("D."):
+                    current_options.append(line)
+                elif line.startswith("Answer:"):
+                    correct_answer = line.replace("Answer:", "").strip().lower()
+                    questions.append((current_question, current_options, correct_answer))
+                    current_question = None
+                    current_options = []
+                elif line.startswith("Відповідь:"):
+                    correct_answer = line.replace("Відповідь:", "").strip().lower()
+                    questions.append((current_question, current_options, correct_answer))
+                    current_question = None
+                    current_options = []
+
+        return questions
+
+    def ask_questions(self,questions,language):
+        score = 0
+        if self.language=="english":
+            for i, (question, options, correct_answer) in enumerate(questions, 1):
+                print(f"Question {i}: {question}")
+                for option in options:
+                    print(option)
+                user_answer = input("Select your answer (A, B, C, or D): ").strip().lower()
+                if user_answer == correct_answer:
+                    print("Correct!\n")
+                    score += 1
+                else:
+                    print(f"Wrong. The correct answer is: {correct_answer}\n")
+        elif self.language=="ukrainian":
+            j=self.num_q
+            question=questions[j]
+            self.q_text = question[0]
+            i=1
+            for option in question[1]:
+                if (i==1):
+                    self.a_text = option
+                if (i==2):
+                    self.b_text = option
+                if (i==3):
+                    self.c_text = option
+                if (i==4):
+                    self.d_text = option
+                i+=1
+            self.correct_answer = question[2]
+                
+
+        return score
 
 
 class RegistrationWindow(Window):
@@ -456,6 +559,11 @@ class RegistrationWindow(Window):
                 self.active = False
                 break
             self.screen.fill(BLUE)
+            font = pygame.font.Font(None, 70)
+            prompt_text = font.render("Реєстрація", True, MAGENTA)
+            prompt_rect = prompt_text.get_rect(center=(self.width / 2, self.height / 2 - 200))
+            self.screen.blit(prompt_text, prompt_rect)
+            font = pygame.font.Font(None, 36)
             prompt_text = font.render("Введіть ім'я :", True, YELLOW)
             prompt_rect = prompt_text.get_rect(center=(self.width / 2, self.height / 2 - 50))
             self.screen.blit(prompt_text, prompt_rect)
@@ -502,7 +610,7 @@ class LoginWindow(Window):
         self.active = False
         self.current_encoding = 'utf-8'
         self.errorText = ""
-        self.customer_window = CustomerWindow(parent,self.input_text)
+        self.customer_window = CustomerWindow(self,self.input_text)
         
     def run(self):
         self.running = True
@@ -556,6 +664,11 @@ class LoginWindow(Window):
                 self.active = False
                 break
             self.screen.fill(BLUE)
+            font = pygame.font.Font(None, 70)
+            prompt_text = font.render("Вхід", True, MAGENTA)
+            prompt_rect = prompt_text.get_rect(center=(self.width / 2, self.height / 2 - 200))
+            self.screen.blit(prompt_text, prompt_rect)
+            font = pygame.font.Font(None, 36)
             prompt_text = font.render("Введіть ім'я :", True, YELLOW)
             prompt_rect = prompt_text.get_rect(center=(self.width / 2, self.height / 2 - 50))
             self.screen.blit(prompt_text, prompt_rect)

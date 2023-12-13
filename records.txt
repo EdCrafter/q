@@ -4,3 +4,7 @@ Name: anna
 Score: 12
 Name: mmm
 Score: 1000000
+Name: d
+Score: 0
+Name: ув
+Score: 0
