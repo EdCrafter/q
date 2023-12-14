@@ -87,6 +87,8 @@ class CustomerWindow(Window):
         self.settings_window = SettingWindow(self)
         self.info_window =InfoWindow(self)
         self.last_click_time =0
+        self.difficult = "norm"
+        self.language = "ua"
 
     def run(self):
         running = True
@@ -130,12 +132,13 @@ class CustomerWindow(Window):
                     self.info_window.act = True
                     self.info_window.text = infoText
                     self.info_window.update()
-                if exit_button.is_clicked():
+                if exit_button.is_clicked() and self.ex:
                     self.running = False
                     self.active = False
                     self.parent.running = False
                     self.parent.active = False
                     break
+            self.ex = True
             self.screen.blit(self.background_image_main, (0, 0))
             self.drawLines()
             self.drawTitle()
@@ -218,29 +221,57 @@ class SettingWindow(Window):
         
     def update(self):
         
-        exit_button = Button(self.width / 2 - 150, self.height / 2 + 200, 300, 50,SILVER, "Вийти")
-        enButton = Button(self.width / 2 - 180, self.height / 2 -100, 300, 50,SILVER, "English")
-        uaButton = Button(self.width / 2 + 180, self.height / 2 -100, 300, 50,SILVER, "Українська")
-        easyButton = Button(self.width / 2 - 250, self.height / 2 +120, 100, 50,SILVER, "легкий")
-        mediumButton = Button(self.width / 2 - 140, self.height / 2 +120, 100, 50,SILVER, "нормальний")
-        hardButton = Button(self.width / 2 , self.height / 2 +120, 100, 50,SILVER, "складний")
+        exit_button = Button(self.width / 2 - 150, self.height / 2 + 200, 300, 50,MAROON, "Зберегти")
+        if self.parent.language == "en":
+            enButton = Button(self.width / 2 - 320, self.height / 2 -70, 300, 50,LIME, "English")
+            uaButton = Button(self.width / 2 + 20, self.height / 2 -70, 300, 50,SILVER, "Українська")
+        else:
+            enButton = Button(self.width / 2 - 320, self.height / 2 -70, 300, 50,SILVER, "English")
+            uaButton = Button(self.width / 2 + 20, self.height / 2 -70, 300, 50,LIME, "Українська")
+        if self.parent.difficult == "easy":
+            easyButton = Button(self.width / 2 - 280, self.height / 2 +70, 150, 50,LIME, "легкий")
+            mediumButton = Button(self.width / 2 - 80, self.height / 2 +70, 170, 50,SILVER, "нормальний")
+            hardButton = Button(self.width / 2 +140, self.height / 2 +70, 150, 50,SILVER, "складний")
+        if self.parent.difficult == "norm":
+            easyButton = Button(self.width / 2 - 280, self.height / 2 +70, 150, 50,SILVER, "легкий")
+            mediumButton = Button(self.width / 2 - 80, self.height / 2 +70, 170, 50,LIME, "нормальний")
+            hardButton = Button(self.width / 2 +140, self.height / 2 +70, 150, 50,SILVER, "складний")
+        if self.parent.difficult == "hard":
+            easyButton = Button(self.width / 2 - 280, self.height / 2 +70, 150, 50,SILVER, "легкий")
+            mediumButton = Button(self.width / 2 - 80, self.height / 2 +70, 170, 50,SILVER, "нормальний")
+            hardButton = Button(self.width / 2 +140, self.height / 2 +70, 150, 50,LIME, "складний")
         font = pygame.font.Font(None, 36)
-        self.find_record()
         while self.active:
             for event in pygame.event.get():
                 if event.type == pygame.QUIT:
                     self.active = False
             if exit_button.is_clicked():
-                self.active = False
+                self.parent.ex = False
+                pygame.time.delay(600)
                 break
-            if exit_button.is_clicked():
-                self.running = False
-                self.active = False
-                break
-            if exit_button.is_clicked():
-                self.running = False
-                self.active = False
-                break
+            if enButton.is_clicked():
+                self.parent.language = "en"
+                enButton = Button(self.width / 2 - 320, self.height / 2 -70, 300, 50,LIME, "English")
+                uaButton = Button(self.width / 2 + 20, self.height / 2 -70, 300, 50,SILVER, "Українська")
+            if uaButton.is_clicked():
+                self.parent.language = "ua"
+                enButton = Button(self.width / 2 - 320, self.height / 2 -70, 300, 50,SILVER, "English")
+                uaButton = Button(self.width / 2 + 20, self.height / 2 -70, 300, 50,LIME, "Українська")
+            if easyButton.is_clicked():
+                self.parent.difficult = "easy"
+                easyButton = Button(self.width / 2 - 280, self.height / 2 +70, 150, 50,LIME, "легкий")
+                mediumButton = Button(self.width / 2 - 80, self.height / 2 +70, 170, 50,SILVER, "нормальний")
+                hardButton = Button(self.width / 2 +140, self.height / 2 +70, 150, 50,SILVER, "складний")
+            if mediumButton.is_clicked():
+                self.parent.difficult = "norm"
+                easyButton = Button(self.width / 2 - 280, self.height / 2 +70, 150, 50,SILVER, "легкий")
+                mediumButton = Button(self.width / 2 - 80, self.height / 2 +70, 170, 50,LIME, "нормальний")
+                hardButton = Button(self.width / 2 +140, self.height / 2 +70, 150, 50,SILVER, "складний")
+            if hardButton.is_clicked():
+                self.parent.difficult = "hard"
+                easyButton = Button(self.width / 2 - 280, self.height / 2 +70, 150, 50,SILVER, "легкий")
+                mediumButton = Button(self.width / 2 - 80, self.height / 2 +70, 170, 50,SILVER, "нормальний")
+                hardButton = Button(self.width / 2 +140, self.height / 2 +70, 150, 50,LIME, "складний")
             self.screen.blit(self.background_image_main, (0, 0))
             self.drawLines()
             font = pygame.font.Font(None, 80)
@@ -248,32 +279,22 @@ class SettingWindow(Window):
             prompt_rect = prompt_text.get_rect(center=(self.width / 2, self.height / 2 - 200))
             self.screen.blit(prompt_text, prompt_rect)
             font = pygame.font.Font(None, 36)
-            prompt_text = font.render("Мова вікотрини: ", True, BLACK)
+            prompt_text = font.render("Мова вікотрини", True, BLACK)
             prompt_rect = prompt_text.get_rect(center=(self.width / 2, self.height / 2 - 120))
             self.screen.blit(prompt_text, prompt_rect)
-            prompt_text = font.render(f"Ваш виграш : {self.customer_score} coins", True, YELLOW)
-            prompt_rect = prompt_text.get_rect(center=(self.width / 2, self.height / 2 - 80))
+            prompt_text = font.render("Складність", True, BLACK)
+            prompt_rect = prompt_text.get_rect(center=(self.width / 2, self.height / 2))
             self.screen.blit(prompt_text, prompt_rect)
+           
         
             exit_button.draw(self.screen)
-            play_button.draw(self.screen)
-            setting_button.draw(self.screen)
-            info_button.draw(self.screen)
-            pygame.display.flip()
+            enButton.draw(self.screen)
+            uaButton.draw(self.screen)
+            easyButton.draw(self.screen)
+            mediumButton.draw(self.screen)
+            hardButton.draw(self.screen)
 
-    def find_record(self):
-        nameFind = False
-        with open("records.txt", "r", encoding=self.current_encoding) as file:
-            lines = file.readlines()
-        for line in lines:
-            line = line.strip()
-            if line:
-                if line.startswith("Name:"):
-                    if((line.replace("Name:", "").strip().lower()) == self.customer_name.lower()):
-                        nameFind = True
-                if line.startswith("Score:") and nameFind:
-                    self.customer_score = line.replace("Score:", "").strip().lower()
-                    break
+            pygame.display.flip()
 
 class PlayWindow(Window):
     def __init__(self,parent,language="ukrainian"):
@@ -283,7 +304,6 @@ class PlayWindow(Window):
         self.current_encoding = 'utf-8'
         self.scoreText = ""
         self.customer_score=0
-        self.language=language
         self.num_q=0
         self.last_click_time =0
         self.background_image = pygame.image.load("img/bg1.jpg").convert()
@@ -295,16 +315,7 @@ class PlayWindow(Window):
         
     def update(self):
         pygame.time.delay(1000)
-        easy_file = "questionsBasa/Ukrainian/easy_questions.txt"
-        medium_file = "questionsBasa/Ukrainian/medium_questions.txt"
-        hard_file = "questionsBasa/Ukrainian/hard_questions.txt"
-
-        easy_questions = self.read_questions_from_file(easy_file)
-        medium_questions = self.read_questions_from_file(medium_file)
-        hard_questions = self.read_questions_from_file(hard_file)
-
-        self.selected_questions = random.sample(easy_questions,5) + random.sample(medium_questions, 5) + random.sample(hard_questions, 5)
-        score = self.ask_questions(self.selected_questions,self.language)
+        self.getQuestions()
         while self.active:
             a_button = Button(self.width / 2 - 450, self.height / 2 -80, 400, 50,OLIVE, self.a_text)
             b_button = Button(self.width / 2 - 450, self.height / 2, 400, 50,PURPLE, self.b_text)
@@ -333,7 +344,7 @@ class PlayWindow(Window):
                         self.num_q += 1
                         if self.check_win():
                             break
-                        self.ask_questions(self.selected_questions,self.language)
+                        self.ask_questions()
                         self.last_click_time = pygame.time.get_ticks()
                     else : 
                         for i in range(3):
@@ -363,7 +374,7 @@ class PlayWindow(Window):
                         self.num_q += 1
                         if self.check_win():
                             break
-                        self.ask_questions(self.selected_questions,self.language)
+                        self.ask_questions()
                         self.last_click_time = pygame.time.get_ticks() 
                     else : 
                         for i in range(3):
@@ -392,7 +403,7 @@ class PlayWindow(Window):
                         self.num_q += 1
                         if self.check_win():
                             break
-                        self.ask_questions(self.selected_questions,self.language)
+                        self.ask_questions()
                         self.last_click_time = pygame.time.get_ticks()
                     else : 
                         for i in range(3):
@@ -421,7 +432,7 @@ class PlayWindow(Window):
                         self.num_q += 1
                         if self.check_win():
                             break
-                        self.ask_questions(self.selected_questions,self.language)
+                        self.ask_questions()
                         self.last_click_time = pygame.time.get_ticks()   
                     else : 
                         for i in range(3):
@@ -548,9 +559,9 @@ class PlayWindow(Window):
             return True
         return False
 
-    def ask_questions(self,questions,language):
-        score = 0
-        if self.language=="english":
+    def ask_questions(self):
+        questions=self.selected_questions
+        if self.parent.language=="en":
             for i, (question, options, correct_answer) in enumerate(questions, 1):
                 print(f"Question {i}: {question}")
                 for option in options:
@@ -561,7 +572,7 @@ class PlayWindow(Window):
                     score += 1
                 else:
                     print(f"Wrong. The correct answer is: {correct_answer}\n")
-        elif self.language=="ukrainian":
+        elif self.parent.language=="ua":
             j=self.num_q
             question=questions[j]
             self.q_text = question[0]
@@ -577,9 +588,7 @@ class PlayWindow(Window):
                     self.d_text = option
                 i+=1
             self.correct_answer = question[2]
-                
 
-        return score
     def drowMoney(self):
         x=270
         y=self.height-130
@@ -596,6 +605,25 @@ class PlayWindow(Window):
             rotated_rect = rotated_text.get_rect(center=prompt_rect.center)
             self.screen.blit(rotated_text, rotated_rect)
             x+=50
+    def getQuestions(self):
+        if self.parent.language == "ua":
+            easy_file = "questionsBasa/Ukrainian/easy_questions.txt"
+            medium_file = "questionsBasa/Ukrainian/medium_questions.txt"
+            hard_file = "questionsBasa/Ukrainian/hard_questions.txt"
+        elif self.parent.language == "en":
+            easy_file = "questionsBasa/English/easy_questions.txt"
+            medium_file = "questionsBasa/English/medium_questions.txt"
+            hard_file = "questionsBasa/English/hard_questions.txt"
+        easy_questions = self.read_questions_from_file(easy_file)
+        medium_questions = self.read_questions_from_file(medium_file)
+        hard_questions = self.read_questions_from_file(hard_file)
+        if self.parent.difficult == "easy":
+            self.selected_questions = random.sample(easy_questions,9) + random.sample(medium_questions, 4) + random.sample(hard_questions, 2)
+        elif self.parent.difficult == "norm":
+            self.selected_questions = random.sample(easy_questions,5) + random.sample(medium_questions, 5) + random.sample(hard_questions, 5)
+        elif self.parent.difficult == "hard":
+            self.selected_questions = random.sample(easy_questions,3) + random.sample(medium_questions, 5) + random.sample(hard_questions, 7)
+        self.ask_questions()
 
 class RegistrationWindow(Window):
     def __init__(self, parent):
