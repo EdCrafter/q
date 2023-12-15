@@ -1,8 +1,12 @@
 Name: ed
-Score: 5014000
+Score: 5023500
 Name: ede
 Score: 1000
 Name: Дмитро
 Score: 0
 Name: dmitro
+Score: 0
+Name: ув
+Score: 1009000
+Name: rrR
 Score: 0

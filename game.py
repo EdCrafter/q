@@ -89,19 +89,6 @@ class CustomerWindow(Window):
         self.last_click_time =0
         self.difficult = "norm"
         self.language = "ua"
-
-    def run(self):
-        running = True
-        while running:
-            for event in pygame.event.get():
-                if event.type == pygame.QUIT:
-                    running = False
-            self.update()
-            pygame.display.flip()
-            self.clock.tick(60)
-        pygame.quit()
-        sys.exit()
-
     def update(self):
         exit_button = Button(self.width / 2 - 150, self.height / 2 + 200, 300, 50,LIME, "Вихід")
         play_button = Button(self.width / 2 - 150, self.height / 2 -40, 300, 50,GREEN, "Грати")
@@ -146,7 +133,7 @@ class CustomerWindow(Window):
             prompt_text = font.render(f"Вітаю {self.customer_name} !!!", True, PURPLE)
             prompt_rect = prompt_text.get_rect(center=(self.width / 2, self.height / 2 - 120))
             self.screen.blit(prompt_text, prompt_rect)
-            prompt_text = font.render(f"Ваш виграш : {self.customer_score} coins", True, YELLOW)
+            prompt_text = font.render(f"Ваш виграш : {self.customer_score} грн", True, YELLOW)
             prompt_rect = prompt_text.get_rect(center=(self.width / 2, self.height / 2 - 80))
             self.screen.blit(prompt_text, prompt_rect)
         
@@ -198,10 +185,16 @@ class InfoWindow(Window):
         self.font = pygame.font.Font(None, 45)
         
     def update(self):
+        exit_button = Button(self.width / 2 - 50, self.height / 2 + 200, 100, 50,CYAN, "Ок")
         while self.act:
             for event in pygame.event.get():
                 if event.type == pygame.QUIT:
                     self.act = False
+            if exit_button.is_clicked():
+                self.parent.parent.ex = False
+                self.parent.ex = False
+                pygame.time.delay(1000)
+                break
             self.screen.fill(SILVER)
             y=200
             for strT in self.text:
@@ -209,6 +202,7 @@ class InfoWindow(Window):
                 prompt_rect = prompt_text.get_rect(center=(self.width / 2, self.height / 2 - y))
                 y-=50
                 self.screen.blit(prompt_text, prompt_rect)
+            exit_button.draw(self.screen)
             self.drawLines()
             pygame.display.flip()
 
@@ -283,7 +277,7 @@ class SettingWindow(Window):
             prompt_rect = prompt_text.get_rect(center=(self.width / 2, self.height / 2 - 120))
             self.screen.blit(prompt_text, prompt_rect)
             prompt_text = font.render("Складність", True, BLACK)
-            prompt_rect = prompt_text.get_rect(center=(self.width / 2, self.height / 2))
+            prompt_rect = prompt_text.get_rect(center=(self.width / 2, self.height / 2+30))
             self.screen.blit(prompt_text, prompt_rect)
            
         
@@ -326,7 +320,6 @@ class PlayWindow(Window):
                     pygame.quit()
                     sys.exit()
 
-            # Проверка нажатия кнопок
             if pygame.time.get_ticks() - self.last_click_time > 1000: 
                 if a_button.is_clicked():
                     self.user_answer = "a"
@@ -452,7 +445,10 @@ class PlayWindow(Window):
             prompt_text = font.render(self.q_text, True, WHITE)
             prompt_rect = prompt_text.get_rect(center=(self.width / 2, self.height / 2 - 200))
             self.screen.blit(prompt_text, prompt_rect)
-            p_text = font.render(f"Ваш виграш : {self.customer_score} coins", True, YELLOW)
+            if self.parent.language == "ua" :
+                p_text = font.render(f"Ваш виграш : {self.customer_score} грн", True, YELLOW)
+            elif self.parent.language == "en" :
+                p_text = font.render(f"Money : {self.customer_score} UAH", True, YELLOW)
             p_rect = p_text.get_rect(center=(self.width / 2, self.height / 2 - 140))
             self.screen.blit(p_text, p_rect)
             self.drowMoney()
@@ -463,11 +459,20 @@ class PlayWindow(Window):
             pygame.display.flip()
 
     def lose(self):
-        infoText = ["","",
-            "Неправильна відповідь !!!","",
-            f"Ваш виграш {self.customer_score}",
+        if self.parent.language == "ua" :
+                infoText = ["",
+                "Неправильна відповідь !!!","",
+                f"Правильною відповіддю є {self.correct_answer} !!!","",
+                f"Отримайте {self.customer_score} грн",
+                "",
+                "Приходьте ще !!!",]
+        elif self.parent.language == "en" :
+            infoText = ["",
+            "Wrong answer !!!","",
+            f"The correct answewr is {self.correct_answer} !!!","",
+            f"Get {self.customer_score} UAH",
             "",
-            "Приходьте ще !!!",]
+            "Come Again !!!",]
         self.info_window1.act = True
         self.info_window1.text = infoText
         self.info_window1.color = RED
@@ -541,12 +546,20 @@ class PlayWindow(Window):
 
     def check_win(self):
         if self.num_q == 15:
-            infoText = ["",
+            if self.parent.language == "ua" :
+                infoText = ["",
                 "Вітаю переможцю !!!","",
                 "Ви є Cправжнім ерудитом !!!","",
                 f"Отримайте {self.customer_score} грн",
                 "",
                 "Приходьте ще !!!",]
+            elif self.parent.language == "en" :
+                infoText = ["",
+                "Congratulations to the winner !!!","",
+                "You are a true erudite !!!","",
+                f"Get {self.customer_score} UAH",
+                "",
+                "Come Again !!!",]
             self.info_window1.act = True
             self.info_window1.text = infoText
             self.info_window1.color = YELLOW
@@ -561,33 +574,21 @@ class PlayWindow(Window):
 
     def ask_questions(self):
         questions=self.selected_questions
-        if self.parent.language=="en":
-            for i, (question, options, correct_answer) in enumerate(questions, 1):
-                print(f"Question {i}: {question}")
-                for option in options:
-                    print(option)
-                user_answer = input("Select your answer (A, B, C, or D): ").strip().lower()
-                if user_answer == correct_answer:
-                    print("Correct!\n")
-                    score += 1
-                else:
-                    print(f"Wrong. The correct answer is: {correct_answer}\n")
-        elif self.parent.language=="ua":
-            j=self.num_q
-            question=questions[j]
-            self.q_text = question[0]
-            i=1
-            for option in question[1]:
-                if (i==1):
-                    self.a_text = option
-                if (i==2):
-                    self.b_text = option
-                if (i==3):
-                    self.c_text = option
-                if (i==4):
-                    self.d_text = option
-                i+=1
-            self.correct_answer = question[2]
+        j=self.num_q
+        question=questions[j]
+        self.q_text = question[0]
+        i=1
+        for option in question[1]:
+            if (i==1):
+                self.a_text = option
+            if (i==2):
+                self.b_text = option
+            if (i==3):
+                self.c_text = option
+            if (i==4):
+                self.d_text = option
+            i+=1
+        self.correct_answer = question[2]
 
     def drowMoney(self):
         x=270
